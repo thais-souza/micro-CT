@@ -1,53 +1,52 @@
 """
-Biblioteca para a determinação do ID do elemento dentro da matriz e para a 
-eliminação dos elementos flutuantes utilizando o Union-Find.
+Library for identifying the element ID inside the matrix and eliminating 
+floating elements using the Union-Find (Disjoint Set) data structure.
 """
 #==================================================================================
-#IMPORTAÇÃO DAS BIBLIOTECAS
+#LIBRARIES IMPORT
 #==================================================================================
 import numpy as np
 import copy
 #==================================================================================
-#FUNÇÃO DE IDENTIFICAÇÃO DO ID
+#ID IDENTIFICATION FUNCTION
 #==================================================================================
 def id(position, size):
     """
-    Função para a determinação da relação entre a posição na matriz 3D e o ID do 
-    elemento. A entrada da função é a posição do elemento na matriz no formato
-    (z, y, x) e o tamanho total da matriz, também no formato (Z, Y, X). A
-    saída é o seu respectivo ID.
+    Function for determining the relationship between the position in the 3D matrix 
+    and the element ID. The function input is the element position in the matrix in
+    the format (z, y, x) and the total matrix size, also in the format (Z, Y, X). The
+    output is the corresponding ID.
     """
     id = position[0] * size [1] * size [2] + position[1] * size [2] + position[2]
     return id
 #==================================================================================
-#FUNÇÃO DE ELIMINAÇÃO DOS ELEMENTOS FLUTUANTES
+#FUNCTION FOR ELIMINATING FLOATING ELEMENTS
 #==================================================================================
 def elim_isel(im, MELT, CFP):
     """
-    Função para a eliminação dos elementos flutuantes. Ela recebe como parâmetros
-    a matriz em questão, o módulo de elasticidade do material constituinte e o 
-    coeficiente de poisson também do material. A sua saída é uma matriz com os
-    elementos flutuantes igualados a zero e um vetor contendo o (mód. elasticidade,
-    coef. de poisson) de cada elemento. Aqueles elementos que são vazios estarão com
-    (0,0).
+    Function for the elimination of floating elements. It receives as parameters
+    the matrix in question, the Young’s modulus of the constituent material, and 
+    the Poisson’s ratio of the material. The output is a matrix with the floating
+    elements set to zero and a vector containing the (Young’s modulus, Poisson’s
+    ratio) of each element. Empty elements will contain (0, 0).
     """
     size = im.shape
     area = size[0]*size[1]*size[2] 
     #==================================================================================
-    #INICIALIZAÇÃO DOS VETORES NECESSÁRIOS PARA O UNION-FIND
+    #INITIALIZATION OF THE VECTORS REQUIRED FOR UNION-FIND
     #==================================================================================
-    #O vetor "parent" será utilizado para armazenar o ID do pai daquele elemento,
-    #relacionado com o pai do conjunto que ele faz parte, e o vetor "qty" para 
-    #armazenar a quantidade de elementos presentes em cada conjunto, possibilitando 
-    #determinar qual o maior conjunto e eliminar todos os elementos que não são seus
-    #constituintes
+    #The "parent" vector will be used to store the parent ID of that element, 
+    #related to the representative (root) of the set it belongs to, and the "qty" 
+    #vector to store the number of elements present in each set, making it
+    #possible to determine the largest set and eliminate all elements that are
+    #not its constituents.
     parent = np.full((area), range(area))
     qty = np.full((area), 1)
     #==================================================================================
-    #DEFINIÇÃO DAS FUNÇÕES NECESSÁRIAS PARA O UNION-FIND
+    #DEFINITION OF THE FUNCTIONS REQUIRED FOR UNION-FIND
     #==================================================================================
-    #O "find" encontrará o pai daquele elemento enquanto o "join" juntará um elemento
-    #ao conjunto que ele faz parte
+    #The "find" function will locate the parent of a given element, while the 
+    #"join" function will merge an element into the set it belongs to.
     def find(x):
         nonlocal parent
         if(parent[x] == x):
@@ -68,10 +67,10 @@ def elim_isel(im, MELT, CFP):
             parent[y] = x
             qty [x] += qty [y]
     #==================================================================================
-    #APLICAÇÃO DO UNION-FIND
+    #APPLICATION OF UNION-FIND
     #==================================================================================
-    #São agregados no mesmo conjunto os elementos adjacentes que possuem material, 
-    #ou seja, que não estão vazios
+    #Adjacent elements that contain material are grouped into the same set,
+    #meaning elements that are not empty.
     for z in range(size[0]):
         for y in range(size[1]):
             for x in range (size[2]):
@@ -90,13 +89,13 @@ def elim_isel(im, MELT, CFP):
                                     if (im[adj] == 255):
                                         join(id(position, size), id(adj, size))
     #==================================================================================
-    #ELIMINAÇÃO DOS ELEMENTOS FLUTUANTES
+    #ELIMINATION OF FLOATING ELEMENTS
     #==================================================================================
-    #Cria-se uma matriz com os elementos flutuantes  
-    #zerados. Os elementos flutuantes são todos aqueles que não fazem parte do
-    #maior conjunto existente na estrutura (determinado pelo número de elementos)
-    #conectados entre si. Também é gerado um vetor para armazenar o material
-    #constituinte de cada elemento (arcabouço ou vazio)
+    #A new matrix is created with the floating elements set to zero. Floating 
+    #elements are all those that are not part of the largest connected set in
+    #the structure (determined by the number of elements connected to each other). 
+    #A vector is also generated to store the constituent material of each element 
+    #(solid framework or empty).
     material_elementos = np.empty((area + 1), dtype = object)
     material_elementos.fill ((0,0))
     contador = 0
