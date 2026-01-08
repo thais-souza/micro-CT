@@ -1,33 +1,32 @@
 """
-Biblioteca para a eliminação das faces internas de uma estrutura formada por
-superfícies triangulares.
+Library for removing the internal faces of a structure formed by triangular surfaces.
 """
 #==================================================================================
-#IMPORTAÇÃO DAS BIBLIOTECAS
+#IMPORTING THE LIBRARIES
 #==================================================================================
 import numpy as np
 import copy
 #==================================================================================
-#FUNÇÃO DE ELIMINAÇÃO DAS FACES INTERNAS
+#FUNCTION FOR REMOVING INTERNAL FACES
 #==================================================================================
 def elim_infa (mconect_all_faces_triangle):
     """
-    A entrada da função é uma matriz de conectividade TRIANGULAR (com cada face
-    em uma linha diferente da matriz e cada linha composta por uma lista com a 
-    identificação dos três vértices que constituem a face). As faces internas 
-    DEVEM ESTAR REPETIDAS, mas não é necessário as 
-    faces repetidas estarem com o mesmo ordenamento dos vértices. 
-    A saída é uma matriz de conectividade sem as faces internas.
+    The function input is a TRIANGULAR connectivity matrix (with each face
+    in a different row of the matrix and each row consisting of a list with the
+    identification of the three vertices that make up the face). Internal faces
+    MUST BE DUPLICATED, but it is not necessary for the duplicate faces to have
+    the same vertex ordering. The output is a connectivity matrix without the 
+    internal faces.
     """
     #===============================================================================
-    #COLOCAR AS FACES COM O MESMO ORDENAMENTO DOS VÉRTICES (CRESCENTE)
+    #PUT THE FACES WITH THE SAME VERTEX ORDERING (ASCENDING)
     #===============================================================================
     mconect_all_faces_triangle_sort = copy.deepcopy(mconect_all_faces_triangle)
     for triangle in mconect_all_faces_triangle_sort:
         triangle.sort()
     triangulos_unicos = np.unique(mconect_all_faces_triangle_sort, axis=0)
     #===============================================================================
-    #RELAÇÃO ENTRE O ÍNDICE DA FACE E A QUANTIDADE DE VEZ QUE ELA SE REPETE
+    #RELATION BETWEEN THE FACE INDEX AND THE NUMBER OF TIMES IT REPEATS
     #===============================================================================
     dict_faces = dict()
     for i in range(len(mconect_all_faces_triangle_sort)):
@@ -36,7 +35,7 @@ def elim_infa (mconect_all_faces_triangle):
         else:
             dict_faces[str(mconect_all_faces_triangle_sort[i])] = [i]
     #===============================================================================
-    #CRIAÇÃO DE UMA LISTA SOMENTE COM OS ÍNDICES DAS FACES REPETIDAS
+    #CREATION OF A LIST CONTAINING ONLY THE INDICES OF THE DUPLICATE FACES
     #===============================================================================
     idx_duplicated_faces = np.array([])
     for face in dict_faces:
@@ -44,7 +43,7 @@ def elim_infa (mconect_all_faces_triangle):
             idx_duplicated_faces = np.append (idx_duplicated_faces, dict_faces[face])
     idx_duplicated_faces.sort()
     #===============================================================================
-    #ELIMINAÇÃO DAS FACES INTERNAS 
+    #REMOVAL OF INTERNAL FACES
     #===============================================================================
     mconect_faces_triangle_shell = []
     for i, face in enumerate(mconect_all_faces_triangle):
@@ -52,6 +51,6 @@ def elim_infa (mconect_all_faces_triangle):
             mconect_faces_triangle_shell.append(face)
     mconect_faces_triangle_shell = np.array(mconect_faces_triangle_shell)
     #===============================================================================
-    #RETORNO DA MATRIZ DE CONECTIVIDADE TRIANGULAR SEM AS FACES INTERNAS
+    #RETURN OF THE TRIANGULAR CONNECTIVITY MATRIX WITHOUT THE INTERNAL FACES
     #===============================================================================
     return mconect_faces_triangle_shell
