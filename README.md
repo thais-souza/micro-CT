@@ -1,4 +1,4 @@
-The goal of this project is to convert a pre-processed micro-CT image of scaffolds for cell deposition (from micro-CT in .tif/.tiff format) into mesh files compatible with Finite Element Method (FEM) simulations of the full system: scaffold + cells + mechanical stimulus.
+The goal of this project is to transform a pre-processed 3D micro-CT image of a scaffold (.tif/.tiff) into mesh files that can be used to run FEM simulations of the scaffold combined with deposited cells under mechanical stimulation.
 
 The pipeline takes a segmented 3D .tif volume as input and outputs mesh files (.msh and .ply) that can be imported into FEM software such as ANSYS, enabling simulations of the coupled ensemble under external stimulation.
 
