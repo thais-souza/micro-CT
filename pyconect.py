@@ -1,47 +1,47 @@
 """
-Biblioteca para criação das matrizes de conectividade e de coordenadas para uma 
-estrutura formada por elementos cúbicos.
+Library for creating the connectivity and coordinate matrices for a structure
+formed by cubic elements.
 """
 #==================================================================================
-#IMPORTAÇÃO DAS BIBLIOTECAS
+#LIBRARIES IMPORT
 #==================================================================================
 import numpy as np
 #==================================================================================
-#FUNÇÃO PARA A CRIAÇÃO DAS MATRIZES DE CONECTIVIDADE E DE COORDENADAS 
+#FUNCTION FOR CREATING THE CONNECTIVITY AND COORDINATE MATRICES
 #==================================================================================
 def create_mcs (EZ, EY, EX, W, H, L):
     """
-    Função para a criação das matrizes de conectifidade e de coordenadas. Recebe
-    como parâmetros o número de elementos da direção Z, na direção Y e na direção
-    X, além do tamanho da estrutura nas mesmas direções Z, Y, X. Retorna duas 
-    matrizes. A primeira de conectividade, com cada linha sendo uma lista dos
-    índices dos vértices que compõem cada elemento cúbico, e a segunda de 
-    coordenadas com cada linha correspondente às coordenadas do vértice com 
-    aquele índice. 
+    Function for creating the connectivity and coordinate matrices. It receives
+    as parameters the number of elements in the Z direction, in the Y direction, 
+    and in the X direction, as well as the size of the structure in the same 
+    directions Z, Y, X. Returns two matrices. The first is the connectivity 
+    matrix, where each row is a list of the vertex indices that compose each
+    cubic element, and the second is the coordinate matrix, where each row 
+    corresponds to the coordinates of the vertex with that index.
     """
     #==================================================================================
-    # DETERMINAÇÃO DOS PARÂMETROS BASEADOS NA ESTRUTURA
+    # DETERMINATION OF THE PARAMETERS BASED ON THE STRUCTURE
     #==================================================================================
-    NX = EX + 1              #Número de pontos no eixo X
-    NY = EY + 1              #Número de pontos no eixo Y
-    NZ = EZ + 1              #Número de pontos no eixo Z
-    NPP = NX * NY            #Número de pontos por camada
-    NEP = EX * EY            #Número de elementos por camada
-    NP = NPP * NZ            #Número de pontos no total
-    NE = NEP * EZ            #Númeto de elementos no total
+    NX = EX + 1              #Number of points on the X axis
+    NY = EY + 1              #Number of points on the Y axis
+    NZ = EZ + 1              #Number of points on the Z axis
+    NPP = NX * NY            #Number of points per layer
+    NEP = EX * EY            #Number of elements per layer
+    NP = NPP * NZ            #Number of points in total
+    NE = NEP * EZ            #Number of elements in total
     #==================================================================================
-    # DETERMINAÇÃO DAS COORDENADAS DOS PONTOS EXISTENTES
+    # DETERMINATION OF THE COORDINATES OF THE EXISTING POINTS
     #==================================================================================
     X = np.concatenate (([0.0] , np.linspace ( 0 , L , NX )))
     Y = np.concatenate (([0.0] , np.linspace ( 0 , H , NY )))
     Z = np.concatenate (([0.0] , np.linspace ( 0 , W , NZ )))
     #==================================================================================
-    # INICIALIZAÇÃO DAS MATRIZES DE CONECTIVIDADE E DE COORDENADAS
+    # INITIALIZATION OF THE CONNECTIVITY AND COORDINATE MATRICES
     #==================================================================================
     mconect = np.full ( ( NE + 1, 8 ),0)
     mcoord = np.zeros ( ( NP + 1, 3 ))
     #==================================================================================
-    # DETERMINAÇÃO DAS MATRIZES DE CONECTIVIDADE E DE COORDENADAS
+    # DETERMINATION OF THE CONNECTIVITY AND COORDINATE MATRICES
     #==================================================================================
     elemento = 1
     linha_elementar = 1
@@ -50,7 +50,7 @@ def create_mcs (EZ, EY, EX, W, H, L):
     while elemento <= NE:
         if elemento == 1:
             #==================================================================================
-            #PRIMEIRO ELEMENTO DA PRIMEIRA CAMADA
+            #FIRST ELEMENT OF THE FIRST LAYER
             #==================================================================================
             mconect [ elemento, : ] = [ 1 , 2 , 3 , 4 , 5 , 6 , 7, 8 ]
 
@@ -64,7 +64,7 @@ def create_mcs (EZ, EY, EX, W, H, L):
 
         elif elemento <= EX:
             #====================================================================================
-            #PRIMEIRA LINHA DA PRIMEIRA CAMADA
+            #FIRST ROW OF THE FIRST LAYER
             #====================================================================================
             mconect [ elemento ] [ : ] = [ mconect [ elemento - 1, 1 ], no_atual + 1, \
                                           no_atual + 2 , mconect [ elemento - 1, 2 ], \
@@ -83,7 +83,7 @@ def create_mcs (EZ, EY, EX, W, H, L):
 
         elif elemento == ( ( linha_elementar - 1 ) * EX ) + 1 and profundidade_elementar == 1:
             #====================================================================================
-            #PRIMEIRA COLUNA DA PRIMEIRA CAMADA
+            #FIRST COLUMN OF THE FIRST LAYER
             #====================================================================================
             mconect [ elemento ] [ : ] = [ mconect [ elemento - EX ] [ 4 ], \
                                            mconect [ elemento - EX ] [ 5 ], \
@@ -102,7 +102,7 @@ def create_mcs (EZ, EY, EX, W, H, L):
 
         elif profundidade_elementar == 1:
             #====================================================================================
-            #RESTANTE DA PRIMEIRA CAMADA (NÃO ESTÁ NEM NA PRIMEIRA COLUNA NEM NA PRIMEIRA LINHA)
+            #REMAINDER OF THE FIRST LAYER (NOT IN THE FIRST COLUMN NOR IN THE FIRST ROW)
             #====================================================================================
             mconect [ elemento ] [ : ] = [ mconect [ elemento - EX ] [ 4 ], \
                                            mconect [ elemento - EX ] [ 5 ], \
@@ -120,7 +120,7 @@ def create_mcs (EZ, EY, EX, W, H, L):
 
         elif elemento == ( ( profundidade_elementar - 1) * NEP ) + 1:
             #====================================================================================
-            #PRIMEIRO ELEMENTO DAS CAMADAS EXCETO A PRIMEIRA
+            #FIRST ELEMENT OF THE LAYERS EXCEPT THE FIRST
             #====================================================================================
             mconect [ elemento, : ] = [ mconect [ elemento - NEP ] [ 3 ], \
                                         mconect [ elemento - NEP ] [ 2 ], \
@@ -145,7 +145,7 @@ def create_mcs (EZ, EY, EX, W, H, L):
 
         elif elemento <= ( ( profundidade_elementar -1 ) * NEP ) + EX:
             #====================================================================================
-            #PRIMEIRA LINHA DAS CAMADAS EXCETO A PRIMEIRA
+            #FIRST ROW OF THE LAYERS EXCEPT THE FIRST
             #====================================================================================
             mconect [ elemento, : ] = [ mconect [ elemento - 1 ] [ 1 ], \
                                         mconect [ elemento - NEP ] [ 2 ], \
@@ -164,7 +164,7 @@ def create_mcs (EZ, EY, EX, W, H, L):
 
         elif elemento == ( ( linha_elementar - 1 ) * EX ) + 1:
             #====================================================================================
-            #PRIMEIRA COLUNA DAS CAMADAS EXCETO A PRIMEIRA
+            #FIRST COLUMN OF THE LAYERS EXCEPT THE FIRST
             #====================================================================================
             mconect [ elemento, : ] = [ mconect [ elemento - EX ] [ 4 ], \
                                         mconect [ elemento - EX ] [ 5 ], \
@@ -183,8 +183,8 @@ def create_mcs (EZ, EY, EX, W, H, L):
             no_atual += 2
         else:
             #====================================================================================
-            #RESTANTE DAS OUTRAS CAMADAS EXCETO A PRIMEIRA (NÃO ESTÁ NEM NA PRIMEIRA COLUNA 
-            #NEM NA PRIMEIRA LINHA NEM NA PRIMEIRA CAMADA)
+            #REMAINDER OF THE OTHER LAYERS EXCEPT THE FIRST (NOT IN THE FIRST COLUMN
+            #NOR IN THE FIRST ROW NOR IN THE FIRST LAYER)
             #====================================================================================
             mconect [ elemento ] [ : ] = [ mconect [ elemento - EX, 4 ], \
                                            mconect [ elemento - EX, 5 ], \
