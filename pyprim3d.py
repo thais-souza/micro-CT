@@ -1,90 +1,89 @@
 """
-Biblioteca para a formação de elementos tetraédricos a partir de uma superfície
-triangular (antes da formação desses elementos é feito ainda a subdivisão das
-faces caso necessário e o smooth). A biblioteca também gera uma figura para a 
-comparação da estrutura antes e depois do smooth (a figura aparece dentro do 
-JUPYTER NOTEBOOK).
+Library for generating tetrahedral elements from a triangular surface (before 
+generating these elements, the faces are subdivided if necessary and smoothing 
+is performed). The library also generates a figure for comparing the structure 
+before and after smoothing (the figure appears inside the JUPYTER NOTEBOOK).
 """
 #==================================================================================
-#IMPORTAÇÃO DAS BIBLIOTECAS
+#IMPORTING THE LIBRARIES
 #==================================================================================
 import pyvista as pv
 import trimesh
 #==================================================================================
-#FUNÇÃO PARA A FORMAÇÃO DOS TETRAEDROS
+#FUNCTION FOR GENERATING THE TETRAHEDRA
 #==================================================================================
 def smooth_tmsh (mcoord, mconect_faces_triangle, TAM_VOX, nm_export, n_subd, it_smooth):
     """
-    Função para a formação dos tetraedros. Recebe como parâmetros a matriz de 
-    coordenadas, a matriz de conectividade das faces triangulares, o tamanho dos
-    catetos (nesse caso assumidos como iguais), o nome do arquivo a ser gerado 
-    (nm_export.ply), o número de subdivisões desejado (cada aumento de uma unidade
-    corresponde a divisão de cada face em 3 dezes) e o número de iterações para
-    o smooth da malha. Assim, antes de formar os tetraedros a função remove os 
-    vértices isolados, as faces repetidas, subdivide a malha e realiza o smooth. 
-    Não há retorno, mas sim a geração de dois arquivos .ply de nomes 
-    "<nm_export>.ply" e "<nm_export_smooth>.ply" que correspondem ao resultado 
-    depois da subdivisão e depois do smooth, respectivamente. No final ainda há
-    a geração de um arquivo "<nm_export.msh", relativo ao arquivo com os elementos
-    tetraédricos. 
+    Function for generating the tetrahedra. It receives as parameters the coordinate
+    matrix, the connectivity matrix of the triangular faces, the leg length
+    (in this case assumed to be equal), the name of the file to be generated
+    (nm_export.ply), the desired number of subdivisions (each increase of one unit
+    corresponds to dividing each face into 3 parts), and the number of iterations for
+    mesh smoothing. Thus, before generating the tetrahedra the function removes
+    isolated vertices, duplicate faces, subdivides the mesh, and performs smoothing.
+    There is no return, but rather the generation of two .ply files named
+    "<nm_export>.ply" and "<nm_export_smooth>.ply", which correspond to the result
+    after subdivision and after smoothing, respectively. At the end there is also
+    the generation of a "<nm_export.msh" file, related to the file with the
+    tetrahedral elements.
     """
     #==================================================================================
-    #IMPORTAÇÃO PARA O TRIMESH
+    #TRIMESH IMPORT
     #==================================================================================
     mesh_trimesh = trimesh.Trimesh(vertices = mcoord[1:], faces = mconect_faces_triangle, \
                                              process = False)
     #==================================================================================
-    #REMOÇÃO DOS VÉRTICES NÃO CONECTADOS A NENHUMA FACE
+    #REMOVAL OF VERTICES NOT CONNECTED TO ANY FACE
     #==================================================================================
     mesh_trimesh.remove_unreferenced_vertices()
     #==================================================================================
-    #REMOÇÃO DAS FACES REPETIDAS
+    #REMOVAL OF DUPLICATE FACES
     #==================================================================================
     trimesh.tol.merge = TAM_VOX/10
     mesh_trimesh.process(validate=True, merge_tex=None, merge_norm=None)
     #==================================================================================
-    #SUBDIVISÃO (CADA SUBDIVISÃO CORRESPONDE A X4 A QUANTIDADE DE FACES ORIGINAL)
+    #SUBDIVISION (EACH SUBDIVISION CORRESPONDS TO 4× THE ORIGINAL NUMBER OF FACES)
     #==================================================================================
     for i in range (n_subd):
         mesh_trimesh = mesh_trimesh.subdivide()
     mesh_trimesh.export(nm_export + ".ply")
     #==================================================================================
-    #SMOOTH DA ESTRUTURA SUBDIVIDIDA
+    #SMOOTHING OF THE SUBDIVIDED STRUCTURE
     #==================================================================================
     trimesh.smoothing.filter_laplacian(mesh_trimesh, iterations=it_smooth)
     mesh_trimesh.export(nm_export + "_smooth.ply")
     #==================================================================================
-    #FORMAÇÃO DOS TETRAEDROS
+    #TETRAHEDRA GENERATION
     #==================================================================================
     trimesh.interfaces.gmsh.to_volume(mesh_trimesh, file_name=nm_export + "_smooth.msh", \
                                       max_element=None, mesher_id=1)
 #==================================================================================
-#FUNÇÃO PARA O PLOT DA ESTRUTURA ANTES E DEPOIS DO SMOOTH
+#FUNCTION FOR PLOTTING THE STRUCTURE BEFORE AND AFTER SMOOTHING
 #==================================================================================
 def smooth_plot (nm_bf_smooth, nm_aft_smooth):
     """
-    Função para a plotagem da estrutura antes e depois do smooth. Recebe como 
-    parâmetros o nome do arquivo (do formato .ply) antes do smooth e o nome
-    do arquivo (também .ply) depois do smooth. A imagem formada consiste apenas
-    no traçado da estrutura antes do smooth e a estrutura completa depois do
-    smooth.
+    Function for plotting the structure before and after smoothing. It receives as
+    parameters the file name (in .ply format) before smoothing and the file name
+    (also .ply) after smoothing. The generated image consists only of the
+    wireframe of the structure before smoothing and the complete structure after
+    smoothing
     """
     #==================================================================================
-    #CARREGAMENTO DOS DOIS ARQUIVOS
+    #LOADING THE TWO FILES
     #==================================================================================
     mesh_polydata = pv.PolyData(nm_bf_smooth)
     mesh_polydata_smooth = pv.PolyData(nm_aft_smooth)
     #==================================================================================
-    #EXTRAÇÃO APENAS DO TRAÇADO DA ESTRUTURA ANTES DO SMOOTH
+    #EXTRACTION OF ONLY THE WIREFRAME OF THE STRUCTURE BEFORE SMOOTHING
     #==================================================================================
     orig_edges = mesh_polydata.extract_feature_edges()
     #==================================================================================
-    #DETERMINAÇÃO DAS CARACTERÍSTICAS DE VISUALIZAÇÃO NO JUPYTER NOTEBOOK
+    #DETERMINATION OF THE VISUALIZATION SETTINGS IN THE JUPYTER NOTEBOOK
     #==================================================================================
     pv.set_plot_theme('document')
     pv.global_theme.jupyter_backend = 'panel'
     #==================================================================================
-    #FORMAÇÃO DA IMAGEM
+    #IMAGE GENERATION
     #==================================================================================
     pl = pv.Plotter()
     pl.add_mesh(mesh_polydata_smooth, show_edges=True, show_scalar_bar=True)
