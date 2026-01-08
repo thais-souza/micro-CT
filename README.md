@@ -4,7 +4,7 @@ The pipeline takes a segmented 3D .tif volume as input and outputs mesh files (.
 
 The final mesh is composed of tetrahedral elements, as shown below.
 
-<img width="1448" height="985" alt="Mesh comparison after smoothing" src="https://github.com/user-attachments/assets/f81d2d9b-b0bb-4ec9-a0a2-cd0c6b7a3035" />
+<img width="1448" height="842" alt="image" src="https://github.com/user-attachments/assets/fb697333-a007-4821-bae5-c05246ef2a3d" />
 
 To run the pipeline, refer to the example provided in main.ipynb. The workflow requires: pip install trimesh==3.22.5.
 
